@@ -31,5 +31,5 @@ int main() {
     generarTribonacci(cantidadNumeros);
 
     return 0;
-    //Lester David Payes Méndez 0905-24-22750
+   
 }
