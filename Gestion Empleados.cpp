@@ -1,10 +1,11 @@
 #include <iostream>
 #include <string>
+#include <limits>
 using namespace std;
 
 // Definición de una estructura para un Empleado
 struct Empleado {
-    int id;
+    string id;  // Cambiado a string para permitir letras y números
     string nombre;
     float salario;
 };
@@ -14,31 +15,45 @@ const int MAX_EMPLEADOS = 50;
 Empleado empleados[MAX_EMPLEADOS];
 int totalEmpleados = 0;
 
+// Función para ingresar una cadena con validación
+string ingresarCadena(const string& mensaje) {
+    string valor;
+    cout << mensaje;
+    getline(cin, valor);
+    return valor;
+}
+
+// Función para ingresar un número decimal dentro de un rango
+float ingresarNumeroDecimal(const string& mensaje, float min, float max) {
+    float valor;
+    while (true) {
+        cout << mensaje;
+        cin >> valor;
+
+        if (cin.fail() || valor < min || valor > max) {
+            cout << "Error: Ingrese un número decimal válido entre " << min << " y " << max << ": ";
+            cin.clear();  // Limpiar estado de error
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Descartar la entrada no válida
+        } else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Limpiar el buffer
+            return valor;
+        }
+    }
+}
+
 // Función para agregar un empleado
 void agregarEmpleado() {
     if (totalEmpleados < MAX_EMPLEADOS) {
         Empleado nuevoEmpleado;
 
-        // Ingresar el ID del empleado, solo permitir números
-        cout << "Ingrese el ID del empleado: ";
-        while (!(cin >> nuevoEmpleado.id)) {  // Validación de número
-            cout << "Error: Ingrese un número válido para el ID: ";
-            cin.clear();  // Limpiar estado de error
-            cin.ignore(1000, '\n');  // Descartar la entrada no válida
-        }
+        // Ingresar el ID del empleado
+        nuevoEmpleado.id = ingresarCadena("Ingrese el ID del empleado: ");
 
-        // Limpiar el buffer antes de leer cadenas
-        cin.ignore();  
-        cout << "Ingrese el nombre del empleado: ";
-        getline(cin, nuevoEmpleado.nombre);  // Leer el nombre del empleado
+        // Leer el nombre del empleado
+        nuevoEmpleado.nombre = ingresarCadena("Ingrese el nombre del empleado: ");
 
-        // Ingresar el salario del empleado, solo permitir números
-        cout << "Ingrese el salario del empleado: ";
-        while (!(cin >> nuevoEmpleado.salario)) {  // Validación de número
-            cout << "Error: Ingrese un número válido para el salario: ";
-            cin.clear();  // Limpiar estado de error
-            cin.ignore(1000, '\n');  // Descartar la entrada no válida
-        }
+        // Ingresar el salario del empleado
+        nuevoEmpleado.salario = ingresarNumeroDecimal("Ingrese el salario del empleado: ", 0.0f, numeric_limits<float>::max());
 
         empleados[totalEmpleados] = nuevoEmpleado;
         totalEmpleados++;
@@ -54,7 +69,7 @@ void mostrarEmpleados() {
         cout << "No hay empleados registrados.\n";
     } else {
         cout << "Lista de empleados:\n";
-        for (int i = 0; i < totalEmpleados; i++) {  // Cambiar <= a < para evitar acceder fuera del rango
+        for (int i = 0; i < totalEmpleados; i++) {
             cout << "ID: " << empleados[i].id
                  << " | Nombre: " << empleados[i].nombre
                  << " | Salario: " << empleados[i].salario << endl;
@@ -64,22 +79,11 @@ void mostrarEmpleados() {
 
 // Función para actualizar el salario de un empleado
 void actualizarSalario() {
-    int id;
-    cout << "Ingrese el ID del empleado: ";
-    while (!(cin >> id)) {  // Validación de número
-        cout << "Error: Ingrese un número válido para el ID: ";
-        cin.clear();  // Limpiar estado de error
-        cin.ignore(1000, '\n');  // Descartar la entrada no válida
-    }
+    string id = ingresarCadena("Ingrese el ID del empleado: ");
 
     for (int i = 0; i < totalEmpleados; i++) {
         if (empleados[i].id == id) {
-            cout << "Ingrese el nuevo salario: ";
-            while (!(cin >> empleados[i].salario)) {  // Validación de número
-                cout << "Error: Ingrese un número válido para el salario: ";
-                cin.clear();  // Limpiar estado de error
-                cin.ignore(1000, '\n');  // Descartar la entrada no válida
-            }
+            empleados[i].salario = ingresarNumeroDecimal("Ingrese el nuevo salario: ", 0.0f, numeric_limits<float>::max());
             cout << "Salario actualizado exitosamente.\n";
             return;
         }
@@ -89,18 +93,11 @@ void actualizarSalario() {
 
 // Función para eliminar un empleado
 void eliminarEmpleado() {
-    int id;
-    cout << "Ingrese el ID del empleado a eliminar: ";
-    while (!(cin >> id)) {  // Validación de número
-        cout << "Error: Ingrese un número válido para el ID: ";
-        cin.clear();  // Limpiar estado de error
-        cin.ignore(1000, '\n');  // Descartar la entrada no válida
-    }
+    string id = ingresarCadena("Ingrese el ID del empleado a eliminar: ");
 
     for (int i = 0; i < totalEmpleados; i++) {
         if (empleados[i].id == id) {
-            // Mover todos los empleados después del eliminado una posición hacia adelante
-            for (int j = i; j < totalEmpleados - 1; j++) {  // Cambiar <= a < para evitar acceder fuera del rango
+            for (int j = i; j < totalEmpleados - 1; j++) {
                 empleados[j] = empleados[j + 1];
             }
             totalEmpleados--;
@@ -122,11 +119,14 @@ int main() {
         cout << "4. Eliminar empleado\n";
         cout << "5. Salir\n";
         cout << "Seleccione una opción: ";
-        while (!(cin >> opcion)) {  // Validación de número para opción del menú
-            cout << "Error: Ingrese un número válido para la opción: ";
+
+        while (!(cin >> opcion) || opcion < 1 || opcion > 5) {  // Validación de número para opción del menú
+            cout << "Error: Ingrese una de las opciones dadas.\n";
             cin.clear();  // Limpiar estado de error
-            cin.ignore(1000, '\n');  // Descartar la entrada no válida
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Descartar la entrada no válida
         }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Limpiar el buffer
 
         switch (opcion) {
             case 1:
@@ -144,11 +144,9 @@ int main() {
             case 5:
                 cout << "Saliendo del sistema...\n";
                 break;
-            default:
-                cout << "Opción no válida.\n";
         }
     } while (opcion != 5);
 
     return 0;
 }
-// Lester David Payes Méndez 0905-24-22750
+//Lester David payes Méndez 0905-24-22750
